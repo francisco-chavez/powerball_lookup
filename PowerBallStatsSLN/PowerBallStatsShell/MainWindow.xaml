@@ -6,7 +6,18 @@
         xmlns:local="clr-namespace:PowerBallStatsShell"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="auto" />
+			<RowDefinition Height="*" />
+			<RowDefinition Height="auto" />
+		</Grid.RowDefinitions>
 
-    </Grid>
+		<Menu Grid.Row="0">
+			<MenuItem Header="Load Data..."
+					  Command="{Binding LoadRawDataCommand}"/>
+			<MenuItem Header="Exit" />
+		</Menu>
+		
+	</Grid>
 </Window>
