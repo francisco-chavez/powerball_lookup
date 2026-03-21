@@ -1,0 +1,15 @@
+Match  Prize        Power Plays 2X,         3X,         4X,         5X,        10X
+5+1 => Grand Prize
+5+0 => $1 Million   $2 Million,       $2 Million,  $2 Million,  $2 Million,  $2 Million
+4+1 => $50,000      $100,000          $150,000     $200,000     $250,000     $500,000
+4+0 => $100         $200              $300         $400         $500         $1,000
+3+1 => $100         $200              $300         $400         $500         $1,000
+3+0 => $7           $14               $21          $28          $35          $70
+2+1 => $7           $14               $21          $28          $35          $70
+1+1 => $4           $8                $12          $16          $20          $40
+0+1 => $4           $8                $12          $16          $20          $40
+
+Ticket: $2
+Select 5 Numbers:[1-69]
+Select Power Number:[1-26]
+Power Play: Extra $1
