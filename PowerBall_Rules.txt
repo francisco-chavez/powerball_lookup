@@ -13,3 +13,7 @@ Ticket: $2
 Select 5 Numbers:[1-69]
 Select Power Number:[1-26]
 Power Play: Extra $1
+
+There is a Power Play and a Double Play, not to be confused for each other.
+A Power Play is the multiplier listed above.
+A Double Play is a second drawing, where you re-use the numbers you entered for Powerball for $1. They don't have the Power Play multiplier.
