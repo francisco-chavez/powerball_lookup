@@ -26,7 +26,7 @@ public class PowerBallResult
 
 	public PowerBallResult(DateOnly drawDate, IEnumerable<UInt16> winningNumbers, UInt16 powerPlayMultiplier)
 	{
-		if (winningNumbers is null)
+		if (winningNumbers == null)
 			throw new ArgumentNullException(nameof(winningNumbers));
 
 		if (winningNumbers.Count() != PowerBallResult.NUMBER_COUNT)
@@ -48,7 +48,7 @@ public class PowerBallResult
 
 		for (i = 0; i < NUMBER_COUNT - 1; i++)
 			if (!(0 < _winningNumbers[i] && _winningNumbers[i] <= 69))
-				throw new ArgumentOutOfRangeException(nameof(_winningNumbers), $"The winning value at index {i} is out of range.");
+				throw new ArgumentOutOfRangeException(nameof(_winningNumbers), $"The winning number at index {i} is out of range.");
 		if (!(0 < _winningNumbers[NUMBER_COUNT - 1] && _winningNumbers[NUMBER_COUNT - 1] <= 26))
 			throw new ArgumentOutOfRangeException(nameof(_winningNumbers), "The power ball number is out of range.");
 	}
