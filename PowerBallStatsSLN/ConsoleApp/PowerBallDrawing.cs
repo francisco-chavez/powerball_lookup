@@ -61,6 +61,45 @@ public class PowerBallDrawing
 		return this.Date.CompareTo(other.Date);
 	}
 
+	public int CalculateWinnings(int[] numbers, int powerballNumber, bool powerplay)
+	{
+		if (numbers.Length != 5)
+			throw new ArgumentException(nameof(numbers));
+
+		int matchingNumberCount = numbers.Where(n => WinningNumbers.Contains(n)).Count();
+		bool powerballMatch = powerballNumber == this.PowerBallNumber;
+
+		int payout = 0;
+		int mult = this.PowerPlayMultiplier;
+
+		if (matchingNumberCount == 0 && powerballMatch)
+			payout = 4;
+		else if (matchingNumberCount == 1 && powerballMatch)
+			payout = 4;
+		else if (matchingNumberCount == 2 && powerballMatch)
+			payout = 7;
+		else if (matchingNumberCount == 3 && !powerballMatch)
+			payout = 7;
+		else if (matchingNumberCount == 3 && powerballMatch)
+			payout = 100;
+		else if (matchingNumberCount == 4 && !powerballMatch)
+			payout = 100;
+		else if (matchingNumberCount == 4 && powerballMatch)
+			payout = 50_000;
+		else if (matchingNumberCount == 5 && !powerballMatch)
+		{
+			payout = 1_000_000;
+			mult = 2;
+		}
+		else if (matchingNumberCount == 5 && powerballMatch)
+		{
+			payout = 10_000_000;
+			mult = 1;
+		}
+
+		return payout * (powerplay ? mult : 1);
+	}
+
 
 	public static bool IsValidWinningNumber(int n)
 	{
