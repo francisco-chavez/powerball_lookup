@@ -34,6 +34,19 @@ public class PowerBallDrawing
 
 		_powerballNumber		= powerballNumber;
 		_powerplayMultiplier	= powerplayMultiplier;
+
+
+		for (int i = 0; i < _winningNumbers.Length; i++)
+		{
+			if (!IsValidWinningNumber(_winningNumbers[i]))
+				throw new ArgumentOutOfRangeException($"n{i}");
+		}
+
+		if (!IsValidPowerballNumber(powerballNumber))
+			throw new ArgumentOutOfRangeException(nameof(powerballNumber));
+
+		if (!IsValidPowerplayMultiplier(powerplayMultiplier))
+			throw new ArgumentOutOfRangeException(nameof(powerplayMultiplier));
 	}
 
 
@@ -46,6 +59,32 @@ public class PowerBallDrawing
 	public int CompareTo(PowerBallDrawing other)
 	{
 		return this.Date.CompareTo(other.Date);
+	}
+
+
+	public static bool IsValidWinningNumber(int n)
+	{
+		return 0 < n && n < 70;
+	}
+
+	public static bool IsValidPowerballNumber(int n)
+	{
+		return 0 < n && n < 27;
+	}
+
+	public static bool IsValidPowerplayMultiplier(int n)
+	{
+		switch (n)
+		{
+			case 2:
+			case 3:
+			case 4:
+			case 5:
+			case 10:
+				return true;
+			default:
+				return false;
+		}
 	}
 
 }
