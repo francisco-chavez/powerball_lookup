@@ -8,11 +8,17 @@ internal class Program
 {
 
 	public static readonly string INPUT_FILE_HEADER			= "Date(YYYY-MM-DD),N0,N1,N2,N3,N4,P0,Power Play Mult";
-	public static readonly string PARSE_DATE_FORMAT_STRING	= "yyyy-mm-dd";
 
 
 	private static void Main(string[] args)
 	{
+
+		var powerballDrawings = new List<PowerBallDrawing>();
+
+
+		///
+		/// Start Parsing Input
+		/// 
 		if (args.Length == 0)
 		{
 			Console.WriteLine("No file entered.");
@@ -26,8 +32,6 @@ internal class Program
 			Console.WriteLine("Exiting application.");
 			return;
 		}
-
-		var powerballDrawings = new List<PowerBallDrawing>();
 
 		try
 		{
@@ -53,7 +57,15 @@ internal class Program
 						continue;
 					}
 
-					bool keepGoing = DateOnly.TryParseExact(split[0], PARSE_DATE_FORMAT_STRING, out DateOnly drawDate);
+					var splitDate = split[0].Split('-');
+					if (splitDate.Length != 3)
+					{
+						Console.WriteLine($"Failed to parse date from: {line}");
+						Console.WriteLine("Skipping drawing.");
+						Console.WriteLine();
+						continue;
+					}
+					var keepGoing = int.TryParse(splitDate[0], out int year);
 					if (!keepGoing)
 					{
 						Console.WriteLine($"Failed to parse date from: {line}");
@@ -61,6 +73,25 @@ internal class Program
 						Console.WriteLine();
 						continue;
 					}
+					keepGoing = int.TryParse(splitDate[1], out int month);
+					if (!keepGoing)
+					{
+						Console.WriteLine($"Failed to parse date from: {line}");
+						Console.WriteLine("Skipping drawing.");
+						Console.WriteLine();
+						continue;
+					}
+					keepGoing = int.TryParse(splitDate[2], out int dayOfMonth);
+					if (!keepGoing)
+					{
+						Console.WriteLine($"Failed to parse date from: {line}");
+						Console.WriteLine("Skipping drawing.");
+						Console.WriteLine();
+						continue;
+					}
+
+					var drawDate = new DateOnly(year, month, dayOfMonth);
+
 
 					keepGoing = int.TryParse(split[1], out int n0);
 					if (!keepGoing)
@@ -139,5 +170,68 @@ internal class Program
 			Console.WriteLine(ex.Message);
 			return;
 		}
+		///
+		/// Finish Parsing Input
+		/// 
+
+		powerballDrawings.Sort();
+
+		int[] winningNumberCounts	= new int[70];
+		int[] powerballCounts		= new int[27];
+
+		int ticketCost = 2;
+		int powerplayCost = 1;
+
+		int winnings = 0;
+		int spendings = 0;
+		int winningsWithPowerPlay = 0;
+		int spendingsWithPowerPlay = 0;
+
+		for (int i = 0; i < powerballDrawings.Count; i++)
+		{
+			if (i > 9)
+			{
+				var predictedNumbers = PredictNumbers(winningNumberCounts, powerballCounts);
+				winnings += powerballDrawings[i].CalculateWinnings(predictedNumbers.Item1, predictedNumbers.Item2, false);
+				spendings += ticketCost;
+				winningsWithPowerPlay += powerballDrawings[i].CalculateWinnings(predictedNumbers.Item1, predictedNumbers.Item2, true);
+				spendingsWithPowerPlay += (ticketCost + powerplayCost);
+
+			}
+			var winningNumbers	= powerballDrawings[i].WinningNumbers;
+			var powerballNumber = powerballDrawings[i].PowerBallNumber;
+			var multiplier		= powerballDrawings[i].PowerPlayMultiplier;
+
+			foreach (var n in winningNumbers)
+				winningNumberCounts[n]++;
+			powerballCounts[powerballNumber]++;
+		}
 	}
+
+	private static Tuple<int[], int> PredictNumbers(int[] winningNumberWeights, int[] powerballWeights)
+	{
+		var weightedWinningNumbers = new List<Tuple<int, int>>(70);
+		var weightedPowerballNumbers = new List<Tuple<int, int>>(27);
+
+		for (int i = 0; i < winningNumberWeights.Length; i++)
+			weightedWinningNumbers.Add(new Tuple<int, int>(i, winningNumberWeights[i]));
+		for (int i = 0; i < powerballWeights.Length; i++)
+			weightedPowerballNumbers.Add(new Tuple<int, int>(i, powerballWeights[i]));
+
+		weightedWinningNumbers.Sort(SortByGreatestWeightFirst);
+		weightedPowerballNumbers.Sort(SortByGreatestWeightFirst);
+
+		var predictedNumbers = new int[5];
+
+		for (int i = 0; i < 5; i++)
+			predictedNumbers[i] = weightedWinningNumbers[i].Item1;
+
+		return new Tuple<int[], int>(predictedNumbers, weightedPowerballNumbers[0].Item1);
+	}
+
+	private static int SortByGreatestWeightFirst(Tuple<int, int> x, Tuple<int, int> y)
+	{
+		return -1 * x.Item2.CompareTo(y.Item2);
+	}
+
 }
