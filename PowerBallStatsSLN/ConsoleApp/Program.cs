@@ -186,21 +186,45 @@ internal class Program
 		int spendings = 0;
 		int winningsWithPowerPlay = 0;
 		int spendingsWithPowerPlay = 0;
+		int timesPlayed = 0;
 
 		for (int i = 0; i < powerballDrawings.Count; i++)
 		{
+			var winningNumbers  = powerballDrawings[i].WinningNumbers;
+			var powerballNumber = powerballDrawings[i].PowerBallNumber;
+			var multiplier      = powerballDrawings[i].PowerPlayMultiplier;
+
 			if (i > 9)
 			{
-				var predictedNumbers = PredictNumbers(winningNumberCounts, powerballCounts);
-				winnings += powerballDrawings[i].CalculateWinnings(predictedNumbers.Item1, predictedNumbers.Item2, false);
-				spendings += ticketCost;
-				winningsWithPowerPlay += powerballDrawings[i].CalculateWinnings(predictedNumbers.Item1, predictedNumbers.Item2, true);
-				spendingsWithPowerPlay += (ticketCost + powerplayCost);
+				timesPlayed++;
 
+				var predictedNumbers = PredictNumbers(winningNumberCounts, powerballCounts);
+				var drawWinnings = powerballDrawings[i].CalculateWinnings(predictedNumbers.Item1, predictedNumbers.Item2, false);
+				var drawWinningsWithPowerplay = powerballDrawings[i].CalculateWinnings(predictedNumbers.Item1, predictedNumbers.Item2, true);
+				winnings += drawWinnings;
+				spendings += ticketCost;
+				winningsWithPowerPlay += drawWinningsWithPowerplay;
+				spendingsWithPowerPlay += (ticketCost + powerplayCost);
+				
+
+				Console.WriteLine($"Date: {powerballDrawings[i].Date}");
+				Console.WriteLine($"\tWinning Numbers: {{{string.Join(", ", winningNumbers)}}}");
+				Console.WriteLine($"\tPowerball Number: {powerballNumber}");
+				Console.WriteLine($"\tPowerplay Multiplier: {multiplier}");
+				Console.WriteLine();
+				Console.WriteLine($"\tPredicted Winning Numbers: {{{string.Join(", ", predictedNumbers.Item1)}}}");
+				Console.WriteLine($"\tPredicted Powerball Number: {predictedNumbers.Item2}");
+				Console.WriteLine();
+				Console.WriteLine("\tNegative values for standard USD are embedded inside of '()'.");
+				Console.WriteLine($"\tProfit made this draw: {drawWinnings - ticketCost:C}");
+				Console.WriteLine($"\t\tWith Powerplay: ${drawWinningsWithPowerplay - (ticketCost + powerplayCost):C}");
+				Console.WriteLine();
+				Console.WriteLine($"\tNumber of times played: {timesPlayed}");
+				Console.WriteLine($"\tTotal running profit: ${winnings - spendings:C}");
+				Console.WriteLine($"\t\tWith Powerplay: ${winningsWithPowerPlay - spendingsWithPowerPlay:C}");
+				Console.WriteLine();
 			}
-			var winningNumbers	= powerballDrawings[i].WinningNumbers;
-			var powerballNumber = powerballDrawings[i].PowerBallNumber;
-			var multiplier		= powerballDrawings[i].PowerPlayMultiplier;
+
 
 			foreach (var n in winningNumbers)
 				winningNumberCounts[n]++;
