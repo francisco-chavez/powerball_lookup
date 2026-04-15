@@ -1,6 +1,4 @@
 ﻿
-using System.IO;
-
 
 namespace PowerBallStatsCalculator;
 
@@ -179,17 +177,17 @@ internal class Program
 		var winningNumberCounts	= new double[70];
 		var powerballCounts		= new double[27];
 
-		int ticketCost = 2;
-		int powerplayCost = 1;
+		int ticketCost		= 2;
+		int powerplayCost	= 1;
 
-		int winnings = 0;
-		int spendings = 0;
+		int winnings		= 0;
+		int spendings		= 0;
 		int winningsWithPowerPlay = 0;
 		int spendingsWithPowerPlay = 0;
-		int timesPlayed = 0;
-		double decayValue = 0.99;
+		int timesPlayed		= 0;
+		var decayValue		= 0.99;
 
-		for (int i = 0; i < powerballDrawings.Count; i++)
+		for (var i = 0; i < powerballDrawings.Count; i++)
 		{
 			var winningNumbers  = powerballDrawings[i].WinningNumbers;
 			var powerballNumber = powerballDrawings[i].PowerBallNumber;
