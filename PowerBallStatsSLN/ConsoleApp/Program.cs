@@ -176,8 +176,8 @@ internal class Program
 
 		powerballDrawings.Sort();
 
-		int[] winningNumberCounts	= new int[70];
-		int[] powerballCounts		= new int[27];
+		var winningNumberCounts	= new double[70];
+		var powerballCounts		= new double[27];
 
 		int ticketCost = 2;
 		int powerplayCost = 1;
@@ -187,6 +187,7 @@ internal class Program
 		int winningsWithPowerPlay = 0;
 		int spendingsWithPowerPlay = 0;
 		int timesPlayed = 0;
+		double decayValue = 0.99;
 
 		for (int i = 0; i < powerballDrawings.Count; i++)
 		{
@@ -225,6 +226,10 @@ internal class Program
 				Console.WriteLine();
 			}
 
+			for (var j = 1; j < winningNumberCounts.Length; j++)
+				winningNumberCounts[j] *= decayValue;
+			for (var j = 1; j < powerballCounts.Length; j++)
+				powerballCounts[j] *= decayValue;
 
 			foreach (var n in winningNumbers)
 				winningNumberCounts[n]++;
@@ -232,15 +237,16 @@ internal class Program
 		}
 	}
 
-	private static Tuple<int[], int> PredictNumbers(int[] winningNumberWeights, int[] powerballWeights)
+	private static Tuple<int[], int> PredictNumbers(double[] winningNumberWeights, double[] powerballWeights)
 	{
-		var weightedWinningNumbers = new List<Tuple<int, int>>(70);
-		var weightedPowerballNumbers = new List<Tuple<int, int>>(27);
+		// First value is the number, second value is the weight of the number.
+		var weightedWinningNumbers = new List<Tuple<int, double>>(70);
+		var weightedPowerballNumbers = new List<Tuple<int, double>>(27);
 
 		for (int i = 0; i < winningNumberWeights.Length; i++)
-			weightedWinningNumbers.Add(new Tuple<int, int>(i, winningNumberWeights[i]));
+			weightedWinningNumbers.Add(new Tuple<int, double>(i, winningNumberWeights[i]));
 		for (int i = 0; i < powerballWeights.Length; i++)
-			weightedPowerballNumbers.Add(new Tuple<int, int>(i, powerballWeights[i]));
+			weightedPowerballNumbers.Add(new Tuple<int, double>(i, powerballWeights[i]));
 
 		weightedWinningNumbers.Sort(SortByGreatestWeightFirst);
 		weightedPowerballNumbers.Sort(SortByGreatestWeightFirst);
@@ -253,7 +259,7 @@ internal class Program
 		return new Tuple<int[], int>(predictedNumbers, weightedPowerballNumbers[0].Item1);
 	}
 
-	private static int SortByGreatestWeightFirst(Tuple<int, int> x, Tuple<int, int> y)
+	private static int SortByGreatestWeightFirst(Tuple<int, double> x, Tuple<int, double> y)
 	{
 		return -1 * x.Item2.CompareTo(y.Item2);
 	}
