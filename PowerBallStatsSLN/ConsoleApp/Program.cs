@@ -11,7 +11,7 @@ internal class Program
 	private static void Main(string[] args)
 	{
 
-		var powerballDrawings = new List<PowerBallDrawing>();
+		var powerballDrawings = new PowerballDrawings();
 
 
 		///

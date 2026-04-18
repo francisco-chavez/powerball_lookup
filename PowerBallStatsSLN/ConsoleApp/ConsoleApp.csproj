@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <RootNamespace>PowerBallStatsCalculator</RootNamespace>
+    <PackageId>PowerBallStatsCalculator</PackageId>
   </PropertyGroup>
 
 </Project>
