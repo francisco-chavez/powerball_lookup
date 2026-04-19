@@ -185,7 +185,7 @@ internal class Program
 		int winningsWithPowerPlay = 0;
 		int spendingsWithPowerPlay = 0;
 		int timesPlayed		= 0;
-		var decayValue		= 0.925;
+		var decayValue		= 0.99;
 
 		var set_weight_matrix = new double[70,70];
 
@@ -220,11 +220,11 @@ internal class Program
 				Console.WriteLine();
 				Console.WriteLine("\tNegative values for standard USD are embedded inside of '()'.");
 				Console.WriteLine($"\tProfit made this draw: {drawWinnings - ticketCost:C}");
-				Console.WriteLine($"\t\tWith Powerplay: ${drawWinningsWithPowerplay - (ticketCost + powerplayCost):C}");
+				Console.WriteLine($"\t\tWith Powerplay: {drawWinningsWithPowerplay - (ticketCost + powerplayCost):C}");
 				Console.WriteLine();
 				Console.WriteLine($"\tNumber of times played: {timesPlayed}");
-				Console.WriteLine($"\tTotal running profit: ${winnings - spendings:C}");
-				Console.WriteLine($"\t\tWith Powerplay: ${winningsWithPowerPlay - spendingsWithPowerPlay:C}");
+				Console.WriteLine($"\tTotal running profit: {winnings - spendings:C}");
+				Console.WriteLine($"\t\tWith Powerplay: {winningsWithPowerPlay - spendingsWithPowerPlay:C}");
 				Console.WriteLine();
 			}
 
