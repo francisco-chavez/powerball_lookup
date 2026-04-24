@@ -55,6 +55,11 @@ public class PowerBallDrawing
 	public DateOnly Date				{ get { return _date; } }
 	public int		PowerPlayMultiplier { get { return _powerplayMultiplier; }}
 
+	public bool ContainsWinningNumber(int n)
+	{
+		return _winningNumbers.Contains(n);
+	}
+
 
 	public int CompareTo(PowerBallDrawing other)
 	{
