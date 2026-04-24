@@ -185,7 +185,8 @@ internal class Program
 		int winningsWithPowerPlay = 0;
 		int spendingsWithPowerPlay = 0;
 		int timesPlayed		= 0;
-		var decayValue		= 0.99;
+		var decayValue		= 1.0;
+		var powerBallDecayValue = 0.925;
 
 		var set_weight_matrix = new double[70,70];
 
@@ -195,12 +196,13 @@ internal class Program
 			var powerballNumber = powerballDrawings[i].PowerBallNumber;
 			var multiplier      = powerballDrawings[i].PowerPlayMultiplier;
 
-			if (i > 9)
+			if (i > 19)
 			{
 				timesPlayed++;
 
 				//var predictedNumbers = PredictNumbers(winningNumberCounts, powerballCounts);
-				var predictedNumbers = PredictNumbers(set_weight_matrix, powerballCounts);
+				//var predictedNumbers = PredictNumbers(set_weight_matrix, powerballCounts);
+				var predictedNumbers = PredictNumbers(winningNumberCounts, powerballCounts, powerballDrawings, i, decayValue);
 
 				var drawWinnings = powerballDrawings[i].CalculateWinnings(predictedNumbers.Item1, predictedNumbers.Item2, false);
 				var drawWinningsWithPowerplay = powerballDrawings[i].CalculateWinnings(predictedNumbers.Item1, predictedNumbers.Item2, true);
@@ -223,8 +225,8 @@ internal class Program
 				Console.WriteLine($"\t\tWith Powerplay: {drawWinningsWithPowerplay - (ticketCost + powerplayCost):C}");
 				Console.WriteLine();
 				Console.WriteLine($"\tNumber of times played: {timesPlayed}");
-				Console.WriteLine($"\tTotal running profit: {winnings - spendings:C}");
-				Console.WriteLine($"\t\tWith Powerplay: {winningsWithPowerPlay - spendingsWithPowerPlay:C}");
+				Console.WriteLine($"\tTotal running profit: {winnings - spendings:C}, Avg: {(double)(winnings - spendings) / timesPlayed:C}");
+				Console.WriteLine($"\t\tWith Powerplay: {winningsWithPowerPlay - spendingsWithPowerPlay:C}, Avg: {(double)(winningsWithPowerPlay - spendingsWithPowerPlay) / timesPlayed:C}");
 				Console.WriteLine();
 			}
 
@@ -247,7 +249,7 @@ internal class Program
 			for (var j = 1; j < winningNumberCounts.Length; j++)
 				winningNumberCounts[j] *= decayValue;
 			for (var j = 1; j < powerballCounts.Length; j++)
-				powerballCounts[j] *= decayValue;
+				powerballCounts[j] *= powerBallDecayValue;
 
 			foreach (var n in winningNumbers)
 				winningNumberCounts[n]++;
@@ -258,13 +260,8 @@ internal class Program
 	private static Tuple<int[], int> PredictNumbers(double[] winningNumberWeights, double[] powerballWeights)
 	{
 		// First value is the number, second value is the weight of the number.
-		var weightedWinningNumbers = new List<Tuple<int, double>>(70);
-		var weightedPowerballNumbers = new List<Tuple<int, double>>(27);
-
-		for (int i = 1; i < winningNumberWeights.Length; i++)
-			weightedWinningNumbers.Add(new Tuple<int, double>(i, winningNumberWeights[i]));
-		for (int i = 1; i < powerballWeights.Length; i++)
-			weightedPowerballNumbers.Add(new Tuple<int, double>(i, powerballWeights[i]));
+		var weightedWinningNumbers = PopulateWeightedList(winningNumberWeights);
+		var weightedPowerballNumbers = PopulateWeightedList(powerballWeights);
 
 		weightedWinningNumbers.Sort(SortByGreatestWeightFirst);
 		weightedPowerballNumbers.Sort(SortByGreatestWeightFirst);
@@ -274,14 +271,14 @@ internal class Program
 		for (int i = 0; i < 5; i++)
 			predictedNumbers[i] = weightedWinningNumbers[i].Item1;
 
+		predictedNumbers = predictedNumbers.Order().ToArray();
+
 		return new Tuple<int[], int>(predictedNumbers, weightedPowerballNumbers[0].Item1);
 	}
 
 	private static Tuple<int[], int> PredictNumbers(double[,] winning_numbers_set_weight_matrix, double[] powerball_numbers_weights)
 	{
-		var weightedPowerballNumbers = new List<Tuple<int, double>>(27);
-		for (int i = 0; i < powerball_numbers_weights.Length; i++)
-			weightedPowerballNumbers.Add(new Tuple<int, double>(i, powerball_numbers_weights[i]));
+		var weightedPowerballNumbers = PopulateWeightedList(powerball_numbers_weights);
 		weightedPowerballNumbers.Sort(SortByGreatestWeightFirst);
 
 
@@ -325,13 +322,102 @@ internal class Program
 		for (int i = 0; i < 5; i++)
 			predictedNumbers[i] = weightedWinningNumbers[i].Item1;
 
-
+		predictedNumbers = predictedNumbers.Order().ToArray();
 		return new Tuple<int[], int>(predictedNumbers, weightedPowerballNumbers[0].Item1);
+	}
+
+	private static Tuple<int[], int> PredictNumbers(double[] winning_numbers_weights, double[] powerball_weights, PowerballDrawings drawings, int stop_index, double weight_decay = 1.0)
+	{
+		// Find the powerball with the max weight. If multiple powerballs have the same max weight,
+		// select the one that has most recently been drawn.
+		double current_max_weight = powerball_weights[1];
+		int max_weight_powerball = 1;
+		for (int i = 2; i < 27; i++)
+		{
+			if (powerball_weights[i] == current_max_weight)
+			{
+				for (int j = stop_index - 1; j > 0; j--)
+				{
+					if (i == j)
+					{
+						max_weight_powerball = j;
+						break;
+					}
+					if (j == max_weight_powerball)
+					{
+						break;
+					}
+				}
+			}
+			else if (powerball_weights[i] > current_max_weight)
+			{
+				current_max_weight = powerball_weights[i];
+				max_weight_powerball = i;
+			}
+		}
+
+		var weightedWinningNumbers = PopulateWeightedList(winning_numbers_weights);
+		weightedWinningNumbers.Sort(SortByGreatestWeightFirst);
+		int max_weight_winning_number = weightedWinningNumbers[0].Item1;
+
+		// If multiple winning numbers have the max weight, then we need to find the most recent one.
+		if (weightedWinningNumbers[0].Item2 == weightedWinningNumbers[1].Item2)
+		{
+			var numbers_to_sort_out = new List<int>();
+			numbers_to_sort_out.Add(weightedWinningNumbers[0].Item1);
+			numbers_to_sort_out.Add(weightedWinningNumbers[1].Item1);
+			for (int i = 2; weightedWinningNumbers[i].Item2 == weightedWinningNumbers[0].Item2; i++)
+				numbers_to_sort_out.Add(weightedWinningNumbers[i].Item1);
+			max_weight_winning_number = drawings.FindMostRecentWinningNumber(drawings[stop_index].Date, numbers_to_sort_out.ToArray());
+		}
+
+		// Create a new set of weights for the drawn winning numbers. But, only increase a numbers
+		// weight when that number has been drawn with the number that holds the max weight from
+		// the initial weight set.
+		var new_weights = new double[70];
+		for (int i = 0; i < stop_index; i++)
+		{
+			for (int j = 1; j < 70; j++)
+				new_weights[j] *= weight_decay;
+
+			if (drawings[i].ContainsWinningNumber(max_weight_winning_number))
+			{
+				foreach (var wn in drawings[i].WinningNumbers)
+					new_weights[wn] += 1.0;
+			}
+		}
+
+		// With the new weight set, select the 5 numbers with the max weight.
+		weightedWinningNumbers = PopulateWeightedList(new_weights, weightedWinningNumbers);
+		weightedWinningNumbers.Sort(SortByGreatestWeightFirst);
+
+		var prediction = new Tuple<int[], int>(
+			weightedWinningNumbers.Take(5).Select(t => t.Item1).Order().ToArray(),
+			max_weight_powerball
+		);
+
+		return prediction;
 	}
 
 	private static int SortByGreatestWeightFirst(Tuple<int, double> x, Tuple<int, double> y)
 	{
 		return -1 * x.Item2.CompareTo(y.Item2);
+	}
+
+	private static List<Tuple<int, double>> PopulateWeightedList(double[] weighted_numbers, List<Tuple<int, double>> reused_list)
+	{
+		reused_list.Clear();
+
+		for (int i = 1; i < weighted_numbers.Length; i++)
+			reused_list.Add(new Tuple<int, double>(i, weighted_numbers[i]));
+
+		return reused_list;
+	}
+
+	private static List<Tuple<int, double>> PopulateWeightedList(double[] weighted_numbers)
+	{
+		var results = new List<Tuple<int, double>>(weighted_numbers.Length - 1);
+		return PopulateWeightedList(weighted_numbers, results);
 	}
 
 }
